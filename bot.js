@@ -443,7 +443,9 @@ bot.hears('ℹ️ Инфо', async ctx => {
 //     }
 // });
 
-const formateUrl = (name) => <a href={`https://www.bybit.com/trade/usdt/${name}`}>{name}</a>
+const formateUrl = (name) => {
+    return `<a href={\`https://www.bybit.com/trade/usdt/${name}\`}>{name}</a>`
+}
 
 
 bot.hears('🔄 Просмотр Баланса и позиции', async ctx => {
