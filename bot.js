@@ -444,7 +444,7 @@ bot.hears('ℹ️ Инфо', async ctx => {
 // });
 
 const formateUrl = (name) => {
-    return `<a href={\`https://www.bybit.com/trade/usdt/${name}\`}>{name}</a>`
+    return `https://www.bybit.com/trade/usdt/${name}`
 }
 
 
@@ -470,7 +470,7 @@ bot.hears('🔄 Просмотр Баланса и позиции', async ctx =>
             }
             positions.forEach(pos => {
                 const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
-                message += `\n▫️ <b>${formateUrl(pos.symbol)}</b> (${pos.side})` +
+                message += `\n▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})` +
                     `\n  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)}` +
                     `\n  ${formaterValue(balance, formateSizeDollars(pos.size, pos.entry))}\n`
             });
