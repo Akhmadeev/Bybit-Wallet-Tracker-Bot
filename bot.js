@@ -25,18 +25,18 @@ const hours = new Date().getHours() + 3;
 
 const formaterValue = (balance, value) => {
     if (hours > 18) {
-        if (value <= (balance * .5)) {
+        if (value <= (balance * .2)) {
             return `✅ Объем в $: ${value}`
-        } else if (value > (balance * .5)) {
+        } else if (value > (balance * .2)) {
             return `🔴️ Объем в $: ${value}`
         }
     } else {
-        if (value <= (balance * 2)) {
+        if (value <= (balance)) {
             return `✅ Объем в $: ${value}`
-        } else if (value > (balance * 2) && value <= (balance * 3)) {
+        } else if (value > (balance) && value <= (balance * 2)) {
             return `⚠️ Объем в $: ${value}`
         }
-        else if (value > (balance * 3)) {
+        else if (value > (balance * 2)) {
             return `🔴️ Объем в $: ${value}`
         }
         return `Объем в $: ${value}`
@@ -348,26 +348,26 @@ bot.hears('ℹ️ Инфо', async ctx => {
             
        📊 *1. Контроль объема позиции*  
           - ✅ *Норма*: 
-              Объем ≤ 2x баланса (💰${(balance * 2).toFixed(1)})
+              Объем ≤ 1x баланса (💰${balance.toFixed(1)})
                 
           - ⚠️ *Предупреждение*: 
-              Объем > 2x (💰${(balance * 2).toFixed(1)}), 
-              до ≤ 3x (💰${(balance * 3).toFixed(1)}) 
+              Объем > 1x (💰${balance.toFixed(1)}), 
+              до ≤ 2x (💰${(balance * 2).toFixed(1)}) 
                 
           - 🔴 *Стоп-торговля*: 
-              Объем > 3x (💰${(balance * 3).toFixed(1)})
+              Объем > 2x (💰${(balance * 2).toFixed(1)})
             
                 
        🔻 *2. Лимит убытков*  
           - При падении баланса на -20%
             писать и останавливать торговлю 
             или переводить в безопасный режим,
-            как при ночной торговли объем ≤ 0.5x баланса (💰${(balance * 0.5).toFixed(1)}).
+            как при ночной торговли объем ≤ 0.5x баланса (💰${(balance * 0.2).toFixed(1)}).
             
             
        🌙 *3. Ночной режим (19:00 – 05:00)*  
           - ❌ Торговля запрещена.  
-          - *Исключение*: если объем ≤ 0.5x баланса (💰${(balance * 0.5).toFixed(1)}).
+          - *Исключение*: если объем ≤ 0.5x баланса (💰${(balance * 0.2).toFixed(1)}).
             
             
        📌 *Доп. правила безопасности*:  
@@ -444,6 +444,8 @@ bot.hears('ℹ️ Инфо', async ctx => {
 //     }
 // });
 
+const formateUrl = (name) => `https://www.bybit.com/trade/usdt/${name}`
+
 bot.hears('🔄 Просмотр Баланса и позиции', async ctx => {
     if (!checkAccessBalance(ctx) && !checkAccessPosition(ctx)) {
         return ctx.reply('⛔ Доступ запрещен');
@@ -466,7 +468,7 @@ bot.hears('🔄 Просмотр Баланса и позиции', async ctx =>
             }
             positions.forEach(pos => {
                 const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
-                message += `\n▫️ <b>${pos.symbol}</b> (${pos.side})` +
+                message += `\n▫️ <b>${formateUrl(pos.symbol)}</b> (${pos.side})` +
                     `\n  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)}` +
                     `\n  ${formaterValue(balance, formateSizeDollars(pos.size, pos.entry))}\n`
             });
