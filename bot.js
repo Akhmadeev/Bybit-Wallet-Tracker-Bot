@@ -318,7 +318,7 @@ bot.hears('📊 Мои позиции', async ctx => {
         let message = '📈 Ваши позиции:\n\n';
         positions.forEach(pos => {
             const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
-            message += `▫️ <b>${pos.symbol}</b> (${pos.side})\n` +
+            message += `▫️ <b>${formateUrl(pos.symbol)}</b> (${pos.side})\n` +
                 `  Объем: ${pos.size.toFixed(4)}\n` +
                 `  Объем в $: ${formateSizeDollars(pos.size, pos.entry)}\n` +
                 `  Вход: ${pos.entry}\n` +
@@ -327,7 +327,7 @@ bot.hears('📊 Мои позиции', async ctx => {
                 `  Ликвидация: ${pos.liqPrice}\n\n`;
         });
 
-        await ctx.reply(message, {parse_mode: 'HTML'});
+        await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
     } catch (error) {
         await ctx.reply('❌ Ошибка при получении позиций');
         console.error('Positions error:', error);
@@ -476,7 +476,7 @@ bot.hears('🔄 Просмотр Баланса и позиции', async ctx =>
             message += '🔎 Нет открытых позиций';
         }
 
-        await ctx.reply(message, {parse_mode: 'HTML'});
+        await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
     } catch (error) {
         await ctx.reply('❌ Ошибка при обновлении данных');
         console.error('Update error:', error);
