@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Telegraf } = require('telegraf');
+const {Telegraf} = require('telegraf');
 const axios = require('axios');
 const crypto = require('crypto');
 
@@ -35,8 +35,7 @@ const formaterValue = (balance, value) => {
             return `✅ Объем в $: ${value}`
         } else if (value > (balance) && value <= (balance * 2)) {
             return `⚠️ Объем в $: ${value}`
-        }
-        else if (value > (balance * 2)) {
+        } else if (value > (balance * 2)) {
             return `🔴️ Объем в $: ${value}`
         }
         return `Объем в $: ${value}`
@@ -109,7 +108,7 @@ async function generateStatsMessage(period) {
     const now = new Date();
     let startDate, endDate, periodName;
 
-    switch(period) {
+    switch (period) {
         case 'today':
             startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -145,7 +144,7 @@ async function generateStatsMessage(period) {
         message += '<b>Последние сделки:</b>\n';
         periodTrades.slice(0, 5).forEach((trade, i) => {
             const tradeIcon = trade.pnl >= 0 ? '✅' : '❌';
-            message += `${i+1}. ${tradeIcon} ${trade.symbol} ${trade.side} - ${trade.pnl.toFixed(2)} USDT\n`;
+            message += `${i + 1}. ${tradeIcon} ${trade.symbol} ${trade.side} - ${trade.pnl.toFixed(2)} USDT\n`;
         });
     } else {
         message += 'Нет сделок за этот период\n';
@@ -328,7 +327,7 @@ bot.hears('📊 Мои позиции', async ctx => {
                 `  Ликвидация: ${pos.liqPrice}\n\n`;
         });
 
-        await ctx.reply(message, { parse_mode: 'HTML' });
+        await ctx.reply(message, {parse_mode: 'HTML'});
     } catch (error) {
         await ctx.reply('❌ Ошибка при получении позиций');
         console.error('Positions error:', error);
@@ -444,7 +443,8 @@ bot.hears('ℹ️ Инфо', async ctx => {
 //     }
 // });
 
-const formateUrl = (name) => `https://www.bybit.com/trade/usdt/${name}`
+const formateUrl = (name) => <a href={`https://www.bybit.com/trade/usdt/${name}`}>{name}</a>
+
 
 bot.hears('🔄 Просмотр Баланса и позиции', async ctx => {
     if (!checkAccessBalance(ctx) && !checkAccessPosition(ctx)) {
@@ -476,7 +476,7 @@ bot.hears('🔄 Просмотр Баланса и позиции', async ctx =>
             message += '🔎 Нет открытых позиций';
         }
 
-        await ctx.reply(message, { parse_mode: 'HTML' });
+        await ctx.reply(message, {parse_mode: 'HTML'});
     } catch (error) {
         await ctx.reply('❌ Ошибка при обновлении данных');
         console.error('Update error:', error);
