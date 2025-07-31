@@ -318,7 +318,7 @@ bot.hears('📊 Мои позиции', async ctx => {
         let message = '📈 Ваши позиции:\n\n';
         positions.forEach(pos => {
             const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
-            message += `▫️ <b>${formateUrl(pos.symbol)}</b> (${pos.side})\n` +
+            message += `▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})\n` +
                 `  Объем: ${pos.size.toFixed(4)}\n` +
                 `  Объем в $: ${formateSizeDollars(pos.size, pos.entry)}\n` +
                 `  Вход: ${pos.entry}\n` +
