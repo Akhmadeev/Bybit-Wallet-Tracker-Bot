@@ -281,18 +281,12 @@ const mainKeyboard = {
 
 const formateSizeDollars = (size, entry) => (size * entry).toFixed(2);
 
-bot.start(ctx => ctx.reply(() => {
-    return `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор.`
-    },
-    mainKeyboard
-));
-
-
 bot.start(ctx => {
     if(ctx.from.id = PRIME_ID) {
         ctx.reply( `Привет госпожа и самая милейшая булочка ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
+    } else {
+        ctx.reply( `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
     }
-    ctx.reply( `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
 });
 
 bot.hears('📊 Статистика', async (ctx) => {
