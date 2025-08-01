@@ -2,6 +2,7 @@ require('dotenv').config();
 const {Telegraf} = require('telegraf');
 const axios = require('axios');
 const crypto = require('crypto');
+const moment = require('moment-timezone');
 
 // Проверка переменных окружения
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -22,7 +23,7 @@ const bot = new Telegraf(BOT_TOKEN);
 // Bybit API функции (полностью переработанные)
 // ========================
 
-const hours = new Date().getHours() + 3;
+const hour = moment().tz('Europe/Moscow').hour();
 
 const formaterValue = (balance, value) => {
     if (hours > 18) {
