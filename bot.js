@@ -289,11 +289,10 @@ bot.start(ctx => ctx.reply(() => {
 
 
 bot.start(ctx => {
-
     if(ctx.from.id = PRIME_ID) {
-        return ctx.reply( `Привет госпожа и самая милейшая булочка ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
+        ctx.reply( `Привет госпожа и самая милейшая булочка ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
     }
-    return ctx.reply( `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
+    ctx.reply( `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
 });
 
 bot.hears('📊 Статистика', async (ctx) => {
