@@ -9,6 +9,7 @@ const BYBIT_API_KEY = process.env.BYBIT_API_KEY;
 const BYBIT_API_SECRET = process.env.BYBIT_API_SECRET;
 const ALLOWED_BALANCE_USER_IDS = process.env.ALLOWED_BALANCE_USER_IDS?.split(',').map(id => id.trim()) || [];
 const ALLOWED_POSITION_USER_IDS = process.env.ALLOWED_POSITION_USER_IDS?.split(',').map(id => id.trim()) || [];
+const PRIME_ID = process.env.PRIME_ID;
 
 if (!BOT_TOKEN || !BYBIT_API_KEY || !BYBIT_API_SECRET) {
     console.error('❌ Отсутствуют переменные окружения! Проверьте .env файл');
@@ -280,10 +281,20 @@ const mainKeyboard = {
 
 const formateSizeDollars = (size, entry) => (size * entry).toFixed(2);
 
-bot.start(ctx => ctx.reply(
-    `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор.`,
+bot.start(ctx => ctx.reply(() => {
+    return `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор.`
+    },
     mainKeyboard
 ));
+
+
+bot.start(ctx => {
+
+    if(ctx.from.id = PRIME_ID) {
+        return ctx.reply( `Привет госпожа и самая милейшая булочка ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
+    }
+    return ctx.reply( `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
+});
 
 bot.hears('📊 Статистика', async (ctx) => {
     await ctx.reply('⛔ Нахуй эту функцию');
