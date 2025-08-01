@@ -23,7 +23,7 @@ const bot = new Telegraf(BOT_TOKEN);
 // Bybit API функции (полностью переработанные)
 // ========================
 
-const hour = moment().tz('Europe/Moscow').hour();
+const hours = moment().tz('Europe/Moscow').hour();
 
 const formaterValue = (balance, value) => {
     if (hours > 18) {
