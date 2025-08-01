@@ -282,7 +282,10 @@ const mainKeyboard = {
 const formateSizeDollars = (size, entry) => (size * entry).toFixed(2);
 
 bot.start(ctx => {
-    if(ctx.from.id = PRIME_ID) {
+    if (checkAccessBalance(ctx) || checkAccessPosition(ctx)) {
+        ctx.reply( `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор. но пока у тебя нет прав, но ты можешь обратиться за правами к админу @ftwlool`)
+    }
+    if(ctx.from.id == PRIME_ID) {
         ctx.reply( `Привет госпожа и самая милейшая булочка ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
     } else {
         ctx.reply( `Привет господин ${ctx.from.first_name}! Я твой Bybit bot монитор.`, mainKeyboard)
