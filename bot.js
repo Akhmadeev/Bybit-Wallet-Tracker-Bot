@@ -304,8 +304,9 @@ bot.hears('💰 Баланс USDT', async ctx => {
     }
 
     try {
-        const balance = await getUSDTBalance();
-        await ctx.reply(`💵 Доступно: ${balance.toFixed(2)} USDT`);
+        await ctx.reply('💵 Доступно: 282.65 USDT');
+        // const balance = await getUSDTBalance();
+        // await ctx.reply(`💵 Доступно: ${balance.toFixed(2)} USDT`);
     } catch (error) {
         await ctx.reply('❌ Ошибка при получении баланса');
         console.error('Balance error:', error);
@@ -318,25 +319,26 @@ bot.hears('📊 Мои позиции', async ctx => {
     }
 
     try {
-        const positions = await getOpenPositions();
-
-        if (positions.length === 0) {
-            return await ctx.reply('🔎 Нет открытых позиций');
-        }
-
-        let message = '📈 Ваши позиции:\n\n';
-        positions.forEach(pos => {
-            const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
-            message += `▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})\n` +
-                `  Объем: ${pos.size.toFixed(4)}\n` +
-                `  Объем в $: ${formateSizeDollars(pos.size, pos.entry)}\n` +
-                `  Вход: ${pos.entry}\n` +
-                `  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)} USDT\n` +
-                `  Плечо: ${pos.leverage.toFixed(1)}x\n` +
-                `  Ликвидация: ${pos.liqPrice}\n\n`;
-        });
-
-        await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
+        await ctx.reply('🔎 Нет открытых позиций');
+        // const positions = await getOpenPositions();
+        //
+        // if (positions.length === 0) {
+        //     return await ctx.reply('🔎 Нет открытых позиций');
+        // }
+        //
+        // let message = '📈 Ваши позиции:\n\n';
+        // positions.forEach(pos => {
+        //     const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
+        //     message += `▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})\n` +
+        //         `  Объем: ${pos.size.toFixed(4)}\n` +
+        //         `  Объем в $: ${formateSizeDollars(pos.size, pos.entry)}\n` +
+        //         `  Вход: ${pos.entry}\n` +
+        //         `  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)} USDT\n` +
+        //         `  Плечо: ${pos.leverage.toFixed(1)}x\n` +
+        //         `  Ликвидация: ${pos.liqPrice}\n\n`;
+        // });
+        //
+        // await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
     } catch (error) {
         await ctx.reply('❌ Ошибка при получении позиций');
         console.error('Positions error:', error);
@@ -351,31 +353,54 @@ bot.hears('ℹ️ Инфо', async ctx => {
     try {
         const balance = await getUSDTBalance();
 
+    //      📊 *1. Контроль объема позиции*
+    //     - ✅ *Норма*:
+    //     Объем ≤ 1x баланса (💰${balance.toFixed(1)})
+    //
+    //     - ⚠️ *Предупреждение*:
+    //     Объем > 1x (💰${balance.toFixed(1)}),
+    //     до ≤ 2x (💰${(balance * 2).toFixed(1)})
+    //
+    //     - 🔴 *Стоп-торговля*:
+    //     Объем > 2x (💰${(balance * 2).toFixed(1)})
+    //
+    //
+    // 🔻 *2. Лимит убытков*
+    //     - При падении баланса на -20%
+    //     писать и останавливать торговлю
+    //     или переводить в безопасный режим,
+    //         как при ночной торговли объем ≤ 0.5x баланса (💰${(balance * 0.2).toFixed(1)}).
+    //
+    //
+    // 🌙 *3. Ночной режим (19:00 – 05:00)*
+    //     - ❌ Торговля запрещена.
+    //     - *Исключение*: если объем ≤ 0.5x баланса (💰${(balance * 0.2).toFixed(1)}).
+
         const rulesMessage = `
         🔹 *Правила управления торговлей* 🔹  
             
        📊 *1. Контроль объема позиции*  
           - ✅ *Норма*: 
-              Объем ≤ 1x баланса (💰${balance.toFixed(1)})
+              Объем ≤ 1x баланса (💰282.7)
                 
           - ⚠️ *Предупреждение*: 
-              Объем > 1x (💰${balance.toFixed(1)}), 
-              до ≤ 2x (💰${(balance * 2).toFixed(1)}) 
+              Объем > 1x (💰282.7), 
+              до ≤ 2x (💰565.3) 
                 
           - 🔴 *Стоп-торговля*: 
-              Объем > 2x (💰${(balance * 2).toFixed(1)})
+              Объем > 2x (💰565.3)
             
                 
        🔻 *2. Лимит убытков*  
           - При падении баланса на -20%
             писать и останавливать торговлю 
             или переводить в безопасный режим,
-            как при ночной торговли объем ≤ 0.5x баланса (💰${(balance * 0.2).toFixed(1)}).
+            как при ночной торговли объем ≤ 0.5x баланса (💰56.5).
             
             
        🌙 *3. Ночной режим (19:00 – 05:00)*  
           - ❌ Торговля запрещена.  
-          - *Исключение*: если объем ≤ 0.5x баланса (💰${(balance * 0.2).toFixed(1)}).
+          - *Исключение*: если объем ≤ 0.5x баланса (💰56.5).
             
             
        📌 *Доп. правила безопасности*:  
@@ -463,31 +488,38 @@ bot.hears('🔄 Просмотр Баланса и позиции', async ctx =>
     }
 
     try {
-        const [balance, positions] = await Promise.all([
-            getUSDTBalance(),
-            getOpenPositions()
-        ]);
 
-        let message = `💵 Баланс: ${balance.toFixed(2)} USDT\n\n`;
+        const message = `💵 Баланс: 282.63 USDT
 
-        if (positions.length > 0) {
-
-            if (hours > 19) {
-                message += `🌙 - Режим\n \n 📊 Позиции:\n`;
-            } else {
-                message += '📊 Позиции:\n';
-            }
-            positions.forEach(pos => {
-                const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
-                message += `\n▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})` +
-                    `\n  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)}` +
-                    `\n  ${formaterValue(balance, formateSizeDollars(pos.size, pos.entry))}\n`
-            });
-        } else {
-            message += '🔎 Нет открытых позиций';
-        }
+🔎 Нет открытых позиций`;
 
         await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
+
+        // const [balance, positions] = await Promise.all([
+        //     getUSDTBalance(),
+        //     getOpenPositions()
+        // ]);
+        //
+        // let message = `💵 Баланс: ${balance.toFixed(2)} USDT\n\n`;
+        //
+        // if (positions.length > 0) {
+        //
+        //     if (hours > 19) {
+        //         message += `🌙 - Режим\n \n 📊 Позиции:\n`;
+        //     } else {
+        //         message += '📊 Позиции:\n';
+        //     }
+        //     positions.forEach(pos => {
+        //         const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
+        //         message += `\n▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})` +
+        //             `\n  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)}` +
+        //             `\n  ${formaterValue(balance, formateSizeDollars(pos.size, pos.entry))}\n`
+        //     });
+        // } else {
+        //     message += '🔎 Нет открытых позиций';
+        // }
+        //
+        // await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
     } catch (error) {
         await ctx.reply('❌ Ошибка при обновлении данных');
         console.error('Update error:', error);
