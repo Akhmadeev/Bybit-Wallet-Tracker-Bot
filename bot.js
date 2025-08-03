@@ -465,37 +465,31 @@ bot.hears('🔄 Просмотр Баланса и позиции', async ctx =>
 
     try {
 
-        const message = `💵 Баланс: 282.63 USDT
+        const [balance, positions] = await Promise.all([
+            getUSDTBalance(),
+            getOpenPositions()
+        ]);
 
-🔎 Нет открытых позиций`;
+        let message = `💵 Баланс: ${balance.toFixed(2)} USDT\n\n`;
+
+        if (positions.length > 0) {
+
+            if (hours > 19) {
+                message += `🌙 - Режим\n \n 📊 Позиции:\n`;
+            } else {
+                message += '📊 Позиции:\n';
+            }
+            positions.forEach(pos => {
+                const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
+                message += `\n▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})` +
+                    `\n  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)}` +
+                    `\n  ${formaterValue(balance, formateSizeDollars(pos.size, pos.entry))}\n`
+            });
+        } else {
+            message += '🔎 Нет открытых позиций';
+        }
 
         await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
-
-        // const [balance, positions] = await Promise.all([
-        //     getUSDTBalance(),
-        //     getOpenPositions()
-        // ]);
-        //
-        // let message = `💵 Баланс: ${balance.toFixed(2)} USDT\n\n`;
-        //
-        // if (positions.length > 0) {
-        //
-        //     if (hours > 19) {
-        //         message += `🌙 - Режим\n \n 📊 Позиции:\n`;
-        //     } else {
-        //         message += '📊 Позиции:\n';
-        //     }
-        //     positions.forEach(pos => {
-        //         const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
-        //         message += `\n▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})` +
-        //             `\n  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)}` +
-        //             `\n  ${formaterValue(balance, formateSizeDollars(pos.size, pos.entry))}\n`
-        //     });
-        // } else {
-        //     message += '🔎 Нет открытых позиций';
-        // }
-        //
-        // await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
     } catch (error) {
         await ctx.reply('❌ Ошибка при обновлении данных');
         console.error('Update error:', error);
