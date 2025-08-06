@@ -12,6 +12,51 @@ const ALLOWED_BALANCE_USER_IDS = process.env.ALLOWED_BALANCE_USER_IDS?.split(','
 const ALLOWED_POSITION_USER_IDS = process.env.ALLOWED_POSITION_USER_IDS?.split(',').map(id => id.trim()) || [];
 const PRIME_ID = process.env.PRIME_ID;
 
+const lowwerText = `
+🔹 *Правила управления торговлей* 🔹  
+        
+        
+    📊 *1. Контроль объема позиции*
+       - ✅ *Норма*:
+       Объем ≤ 1x баланса (💰0.3)
+    
+       - ⚠️ *Предупреждение*:
+       Объем > 1x (💰0.3),
+       до ≤ 2x (💰0.7)
+    
+       - 🔴 *Стоп-торговля*:
+       Объем > 2x (💰0.7)
+
+
+    🔻 *2. Лимит убытков*
+       - При падении баланса на -20%
+       писать и останавливать торговлю
+       или переводить в безопасный режим,
+       как при ночной торговли объем ≤ 0.5x баланса (💰0.1).
+
+    🌙 *3. Ночной режим (19:00 – 05:00)*  
+       - ❌ Торговля запрещена.  
+       - *Исключение*: если объем ≤ 0.5x баланса (💰0.2).
+            
+            
+    📌 *Доп. правила безопасности*:  
+       - 🔸 Трейлинг-стоп (стоп профит) при прибыли *≥3%*.  
+       - 🔸 Фиксация части прибыли при *+10%*.  
+       - 🔸 Стоп при резких скачках цены (*>5% за 5 мин*).  
+       - 🔸 Плечо *>10x* → предупреждение.  
+       - 🔸 Если за день сделал плюс больше 20%-30%,
+          снижается объем позиции в два раза, 
+          чтоб успокоить нервы и эмоции 
+                
+    ⚠️ Уведомлять и стараться так же контролировать плечо,
+       чтоб я ставил стоп лось, 
+       тем более если позиция торгуется сильно в минус
+       долгое время. 🌸
+`
+
+
+
+
 if (!BOT_TOKEN || !BYBIT_API_KEY || !BYBIT_API_SECRET) {
     console.error('❌ Отсутствуют переменные окружения! Проверьте .env файл');
     process.exit(1);
@@ -304,8 +349,12 @@ bot.hears('💰 Баланс USDT', async ctx => {
     }
 
     try {
-        const balance = await getUSDTBalance();
-        await ctx.reply(`💵 Доступно: ${balance.toFixed(2)} USDT`);
+        if (ctx.from.id == PRIME_ID) {
+            return ctx.reply( `💵 Баланс: 0.34 USDT`)
+        } else {
+            const balance = await getUSDTBalance();
+            await ctx.reply(`💵 Доступно: ${balance.toFixed(2)} USDT`);
+        }
     } catch (error) {
         await ctx.reply('❌ Ошибка при получении баланса');
         console.error('Balance error:', error);
@@ -318,25 +367,29 @@ bot.hears('📊 Мои позиции', async ctx => {
     }
 
     try {
-        const positions = await getOpenPositions();
+        if (ctx.from.id == PRIME_ID) {
+            return ctx.reply('🔎 Нет открытых позиций');
+        } else {
+            const positions = await getOpenPositions();
 
-        if (positions.length === 0) {
-            return await ctx.reply('🔎 Нет открытых позиций');
+            if (positions.length === 0) {
+                return await ctx.reply('🔎 Нет открытых позиций');
+            }
+
+            let message = '📈 Ваши позиции:\n\n';
+            positions.forEach(pos => {
+                const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
+                message += `▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})\n` +
+                    `  Объем: ${pos.size.toFixed(4)}\n` +
+                    `  Объем в $: ${formateSizeDollars(pos.size, pos.entry)}\n` +
+                    `  Вход: ${pos.entry}\n` +
+                    `  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)} USDT\n` +
+                    `  Плечо: ${pos.leverage.toFixed(1)}x\n` +
+                    `  Ликвидация: ${pos.liqPrice}\n\n`;
+            });
+
+            await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
         }
-
-        let message = '📈 Ваши позиции:\n\n';
-        positions.forEach(pos => {
-            const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
-            message += `▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})\n` +
-                `  Объем: ${pos.size.toFixed(4)}\n` +
-                `  Объем в $: ${formateSizeDollars(pos.size, pos.entry)}\n` +
-                `  Вход: ${pos.entry}\n` +
-                `  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)} USDT\n` +
-                `  Плечо: ${pos.leverage.toFixed(1)}x\n` +
-                `  Ликвидация: ${pos.liqPrice}\n\n`;
-        });
-
-        await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
     } catch (error) {
         await ctx.reply('❌ Ошибка при получении позиций');
         console.error('Positions error:', error);
@@ -349,10 +402,13 @@ bot.hears('ℹ️ Инфо', async ctx => {
     }
 
     try {
-        const balance = await getUSDTBalance();
+        if (ctx.from.id == PRIME_ID) {
+            ctx.reply(lowwerText)
+        } else {
+            const balance = await getUSDTBalance();
 
 
-        const rulesMessage = `
+            const rulesMessage = `
         🔹 *Правила управления торговлей* 🔹  
         
         
@@ -394,7 +450,8 @@ bot.hears('ℹ️ Инфо', async ctx => {
           долгое время. 🌸
            `;
 
-        await ctx.reply(rulesMessage);
+            await ctx.reply(rulesMessage);
+        }
     } catch (error) {
         await ctx.reply('❌ Ошибка при получении баланса');
         console.error('Balance error:', error);
@@ -464,32 +521,36 @@ bot.hears('🔄 Просмотр Баланса и позиции', async ctx =>
     }
 
     try {
-
-        const [balance, positions] = await Promise.all([
-            getUSDTBalance(),
-            getOpenPositions()
-        ]);
-
-        let message = `💵 Баланс: ${balance.toFixed(2)} USDT\n\n`;
-
-        if (positions.length > 0) {
-
-            if (hours > 19) {
-                message += `🌙 - Режим\n \n 📊 Позиции:\n`;
-            } else {
-                message += '📊 Позиции:\n';
-            }
-            positions.forEach(pos => {
-                const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
-                message += `\n▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})` +
-                    `\n  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)}` +
-                    `\n  ${formaterValue(balance, formateSizeDollars(pos.size, pos.entry))}\n`
-            });
+        if (ctx.from.id == PRIME_ID) {
+            ctx.reply( `💵 Баланс: 0.34 USDT \n🔎 Нет открытых позиций`)
         } else {
-            message += '🔎 Нет открытых позиций';
+            const [balance, positions] = await Promise.all([
+                getUSDTBalance(),
+                getOpenPositions()
+            ]);
+
+            let message = `💵 Баланс: ${balance.toFixed(2)} USDT\n\n`;
+
+            if (positions.length > 0) {
+
+                if (hours > 19) {
+                    message += `🌙 - Режим\n \n 📊 Позиции:\n`;
+                } else {
+                    message += '📊 Позиции:\n';
+                }
+                positions.forEach(pos => {
+                    const pnlIcon = pos.pnl >= 0 ? '🟢' : '🔴';
+                    message += `\n▫️ <b><a href="${formateUrl(pos.symbol)}">${pos.symbol}</a></b> (${pos.side})` +
+                        `\n  PnL: ${pnlIcon} ${pos.pnl.toFixed(2)}` +
+                        `\n  ${formaterValue(balance, formateSizeDollars(pos.size, pos.entry))}\n`
+                });
+            } else {
+                message += '🔎 Нет открытых позиций';
+            }
+
+            await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
         }
 
-        await ctx.reply(message, {parse_mode: 'HTML', disable_web_page_preview: true});
     } catch (error) {
         await ctx.reply('❌ Ошибка при обновлении данных');
         console.error('Update error:', error);
