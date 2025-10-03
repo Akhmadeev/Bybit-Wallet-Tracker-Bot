@@ -261,7 +261,7 @@ const mainKeyboard = {
         keyboard: [
             ['🔄 Просмотр Баланса и позиции'],
             ['💰 Баланс USDT', 'ℹ️ Инфо'],
-            ['📊 Мои позиции', '📊 Статистика']
+            ['📊 Мои позиции', '📊 Подписка']
         ],
         resize_keyboard: true
     }
@@ -498,6 +498,38 @@ bot.hears('🔄 Просмотр Баланса и позиции', async ctx =>
         await ctx.reply('❌ Ошибка при обновлении данных');
         console.error('Update error:', error);
     }
+});
+
+async function checkAndNotifyLossPositions() {
+    try {
+        const positions = await getOpenPositions();
+        const balance = await getUSDTBalance();
+
+        positions.forEach((pos) => {
+            if (pos.pnl < 0) {
+                const message = `
+          ⚠️ Убыточная позиция: ${pos.symbol} (${pos.side})
+          💰 Объем: ${pos.size.toFixed(4)}
+          📉 PnL: ${pos.pnl.toFixed(2)} USDT
+          📊 Объем в $: ${formateSizeDollars(pos.size, pos.entry)}
+          🔗 [Ссылка на торговую пару](${formateUrl(pos.symbol)})
+        `;
+
+                bot.telegram.sendMessage(ctx.from.id, message, {parse_mode: 'HTML', disable_web_page_preview: true});
+            }
+        });
+    } catch (error) {
+        console.error("Ошибка при проверке убыточных позиций:", error);
+    }
+}
+
+bot.hears('📊 Подписка', async ctx => {
+    if (!checkAccessPosition(ctx)) {
+        return ctx.reply('⛔ Доступ запрещен');
+    }
+
+    setInterval(checkAndNotifyLossPositions, 300000); // 300000 мс = 5 минут
+
 });
 
 //  Обработчик кнопки "Назад"
