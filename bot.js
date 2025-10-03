@@ -527,7 +527,7 @@ bot.hears('📊 Подписка', async ctx => {
     if (!checkAccessPosition(ctx)) {
         return ctx.reply('⛔ Доступ запрещен');
     }
-
+    await ctx.reply('Подписка включена, будут приходить данные каждые 5 минут');
     setInterval(checkAndNotifyLossPositions, 300000); // 300000 мс = 5 минут
 
 });
